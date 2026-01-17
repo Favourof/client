@@ -3,28 +3,26 @@
 // ============================================
 
 /**
- * user Object return from Backend
+ * User object returned from backend
  */
-
 export interface User {
+  id: string;
   name: string;
   email: string;
   role: "user" | "admin";
-  isverified: boolean;
-  id: string;
+  isVerified: boolean;
 }
 
 /**
- * User credential for login
+ * Credentials required for login
  */
-
 export interface LoginCredentials {
-  name: string;
+  email: string;
   password: string;
 }
 
 /**
- * Credentail required for Register
+ * Credentials required for registration
  */
 export interface RegisterCredentials {
   name: string;
@@ -34,6 +32,7 @@ export interface RegisterCredentials {
 
 /**
  * Response from login/register endpoints
+ * Contains access token and user data
  */
 export interface AuthResponse {
   success: boolean;
@@ -42,7 +41,8 @@ export interface AuthResponse {
 }
 
 /**
- * Generic API success response
+ * Generic success response (for operations that don't return data)
+ * Used by: logout, verify-email, password-reset, etc.
  */
 export interface SuccessResponse {
   success: boolean;
@@ -50,7 +50,8 @@ export interface SuccessResponse {
 }
 
 /**
- * Generic API error response
+ * Generic error response
+ * Used when any API call fails
  */
 export interface ErrorResponse {
   success: false;
@@ -59,4 +60,34 @@ export interface ErrorResponse {
     field?: string;
     message: string;
   }>;
+}
+
+/**
+ * Password reset request
+ */
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+/**
+ * Password reset confirmation
+ */
+export interface ResetPasswordRequest {
+  token: string;
+  newPassword: string;
+}
+
+/**
+ * Change password request (when logged in)
+ */
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+/**
+ * Email verification request
+ */
+export interface VerifyEmailRequest {
+  token: string;
 }
