@@ -1,7 +1,7 @@
 import axios, {
+  AxiosError,
   type AxiosInstance,
   type InternalAxiosRequestConfig,
-  // AxiosError,
 } from "axios";
 import { API_BASE_URL } from "../utils/constants";
 
@@ -27,44 +27,67 @@ api.interceptors.request.use(
 );
 
 // RESPONSE INTERCEPTOR: Auto-refresh token when expired
-// api.interceptors.response.use(
-//   (response) => response, // If success, just return response
+api.interceptors.response.use(
+  (response) => response,
 
-//   async (error: AxiosError) => {
-//     const originalRequest = error.config as InternalAxiosRequestConfig & {
-//       _retry?: boolean;
-//     };
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-//     // If 401 error and haven't retried yet
-//     if (error.response?.status === 401 && !originalRequest._retry) {
-//       originalRequest._retry = true;
+    // URLs that should NOT trigger token refresh
+    const excludedUrls = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/refresh",
+      "/auth/forgot-password",
+      "/auth/reset-password",
+      "/auth/verify-email",
+      "/auth/resend-verification",
+    ];
 
-//       try {
-//         // Try to refresh token
-//         const { data } = await axios.post(
-//           `${API_BASE_URL}/auth/refresh`,
-//           {},
-//           { withCredentials: true },
-//         );
+    // Check if the failed request URL should be excluded
+    const shouldExclude = excludedUrls.some((url) =>
+      originalRequest.url?.includes(url),
+    );
 
-//         // Save new token
-//         localStorage.setItem("token", data.token);
+    // Only try to refresh if:
+    // 1. Error is 401
+    // 2. Haven't already tried to refresh
+    // 3. URL is not in excluded list
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !shouldExclude
+    ) {
+      originalRequest._retry = true;
 
-//         // Retry original request with new token
-//         if (originalRequest.headers) {
-//           originalRequest.headers.Authorization = `Bearer ${data.token}`;
-//         }
-//         return api(originalRequest);
-//       } catch (refreshError) {
-//         // Refresh failed - logout user
-//         localStorage.removeItem("token");
-//         window.location.href = "/login";
-//         return Promise.reject(refreshError);
-//       }
-//     }
+      try {
+        // Try to refresh token
+        const { data } = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          {},
+          { withCredentials: true },
+        );
 
-//     return Promise.reject(error);
-//   },
-// );
+        // Save new token
+        localStorage.setItem("token", data.token);
+
+        // Retry original request with new token
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${data.token}`;
+        }
+        return api(originalRequest);
+      } catch (refreshError) {
+        // Refresh failed - logout user
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+        return Promise.reject(refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 export default api;

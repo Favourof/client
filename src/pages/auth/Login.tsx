@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/form";
 import { useAuth } from "@/hooks/useAuth";
 import { handleAxiosError } from "@/utils/errorHandler";
+import type { AxiosError } from "axios";
 
 // Validation schema
 const loginSchema = z.object({
@@ -57,8 +58,20 @@ export default function Login() {
       await login(data.email, data.password);
       toast.success("Login successful!");
       navigate("/dashboard");
-    } catch (error: unknown) {
-      handleAxiosError(error, "Login failed");
+    } catch (error) {
+      const axiosError = error as AxiosError<{
+        requiresVerification?: boolean;
+      }>;
+      if (axiosError.response?.data?.requiresVerification) {
+        toast.error("Please verify your email before logging in", {
+          duration: 5000,
+        });
+        setTimeout(() => {
+          navigate("/resend-verification");
+        }, 2000);
+      } else {
+        handleAxiosError(axiosError, "Login failed");
+      }
     } finally {
       setIsLoading(false);
     }

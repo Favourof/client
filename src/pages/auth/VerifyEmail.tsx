@@ -90,15 +90,14 @@ export default function VerifyEmail() {
               </Alert>
 
               <div className="flex flex-col space-y-2">
+                <Button asChild>
+                  <Link to="/resend-verification">
+                    Resend Verification Email
+                  </Link>
+                </Button>
                 <Button asChild variant="outline">
                   <Link to="/login">Go to Login</Link>
                 </Button>
-                <p className="text-sm text-center text-gray-600">
-                  Need a new verification link?{" "}
-                  <Link to="/register" className="text-primary hover:underline">
-                    Register again
-                  </Link>
-                </p>
               </div>
             </>
           )}
