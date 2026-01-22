@@ -1,9 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-// ... existing imports
-
-// Admin pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/UserManagement";
 import Dashboard from "./pages/auth/Dashboard";

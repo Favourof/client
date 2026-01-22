@@ -52,9 +52,6 @@ api.interceptors.response.use(
     );
 
     // Only try to refresh if:
-    // 1. Error is 401
-    // 2. Haven't already tried to refresh
-    // 3. URL is not in excluded list
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
